@@ -1,0 +1,31 @@
+body {
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.sidebar-active {
+    background-color: #e0e7ff;
+    border-right: 3px solid #4f46e5;
+}
+.chart-bar {
+    transition: all 0.3s ease; 
+}
+.chart-bar:hover {
+    opacity: 0.8;
+}
+.timetable-cell {
+    min-height: 60px;
+    border: 1px solid #e5e7eb;
+}
+.timetable-cell.occupied {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+.status-pending { background-color: #fef3c7; color: #92400e; }
+.status-approved { background-color: #d1fae5; color: #065f46; }
+.status-rejected { background-color: #fee2e2; color: #991b1b; }
