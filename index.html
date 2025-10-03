@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSchedule Pro - Intelligent Class Scheduling System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .sidebar-active {
+            background-color: #e0e7ff;
+            border-right: 3px solid #4f46e5;
+        }
+        .chart-bar {
+            transition: all 0.3s ease;
+        }
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+        .timetable-cell {
+            min-height: 60px;
+            border: 1px solid #e5e7eb;
+        }
+        .timetable-cell.occupied {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-approved { background-color: #d1fae5; color: #065f46; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">ES</span>
+                        </div>
+                        <span class="ml-3 text-xl font-semibold text-gray-900">EduSchedule Pro</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"></path>
+                        </svg>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <span class="text-sm font-medium text-gray-700">Dr. Sarah Johnson</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out mt-16" id="sidebar">
+        <div class="flex flex-col h-full">
+            <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                <nav class="mt-5 flex-1 px-2 space-y-1">
+                    <a href="#" class="sidebar-item flex items-center px-2 py-2 text-sm font-medium rounded-md text-indigo-600 sidebar-active" data-page="dashboard">
+                        <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900" data-page="data-input">
+                        <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Data Input
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900" data-page="timetables">
+                        <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v16a2 2 0 002 2z"></path>
+                        </svg>
+                        Timetables
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900" data-page="approval">
+                        <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Approvals
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900" data-page="login">
+                        <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Login Demo
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 pt-16">
+        <!-- Login Page -->
+        <div id="login-page" class="page hidden min-h-screen gradient-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <div class="text-center">
+                        <div class="mx-auto w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-white font-bold text-xl">ES</span>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">EduSchedule Pro</h2>
+                        <p class="text-gray-600">Intelligent Class Scheduling System</p>
+                    </div>
+                    
+                    <form class="mt-8 space-y-6" onsubmit="handleLogin(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input id="email" name="email" type="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your email">
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input id="password" name="password" type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your password">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                            </div>
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                            Sign In
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-xs text-gray-500">For authorized personnel only</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p class="text-gray-600">Overview of your scheduling system</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Courses</p>
+                            <p class="text-2xl font-bold text-gray-900">247</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Faculty Members</p>
+                            <p class="text-2xl font-bold text-gray-900">89</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Classrooms</p>
+                            <p class="text-2xl font-bold text-gray-900">45</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-yellow-100 rounded-lg">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Pending Approvals</p>
+                            <p class="text-2xl font-bold text-gray-900">12</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Classroom Utilization</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Lecture Halls</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-32 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full chart-bar" style="width: 85%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">85%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Labs</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-32 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full chart-bar" style="width: 72%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">72%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Seminar Rooms</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-32 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-purple-600 h-2 rounded-full chart-bar" style="width: 68%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">68%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Updates</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Timetable approved for CS Department</p>
+                                <p class="text-xs text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">New course added: Advanced AI</p>
+                                <p class="text-xs text-gray-500">4 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Faculty availability updated</p>
+                                <p class="text-xs text-gray-500">6 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Input Page -->
+        <div id="data-input-page" class="page hidden p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900">Data Input</h1>
+                <p class="text-gray-600">Manage courses, faculty, and classroom information</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Course Form -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Course</h3>
+                    <form onsubmit="handleCourseSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Course Name</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Advanced Database Systems">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Course Code</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., CS401">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Credits</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Duration (hours)</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Computer Science</option>
+                                <option>Mathematics</option>
+                                <option>Physics</option>
+                                <option>Chemistry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Course Type</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Core Course</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Elective</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Lab Course</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Add Course
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Faculty Form -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Faculty Availability</h3>
+                    <form onsubmit="handleFacultySubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Faculty Name</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Dr. Sarah Johnson</option>
+                                <option>Prof. Michael Chen</option>
+                                <option>Dr. Emily Rodriguez</option>
+                                <option>Prof. David Kim</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="Computer Science" readonly>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Available From</label>
+                                <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="09:00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Available Until</label>
+                                <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="17:00">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Available Days</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Monday</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Tuesday</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Wednesday</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Thursday</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Friday</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Saturday</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Hours per Day</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="6" min="1" max="8">
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            Update Availability
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Classroom Details -->
+            <div class="mt-6 bg-white rounded-lg card-shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Classroom Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <form onsubmit="handleClassroomSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Room Number</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., A-101">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Lecture Hall</option>
+                                <option>Laboratory</option>
+                                <option>Seminar Room</option>
+                                <option>Auditorium</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Equipment</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Projector</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Whiteboard</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Audio System</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                            Add Classroom
+                        </button>
+                    </form>
+
+                    <div class="md:col-span-2">
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Current Classrooms</h4>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                                <div>
+                                    <span class="font-medium text-gray-900">A-101</span>
+                                    <span class="text-sm text-gray-600 ml-2">Lecture Hall (50 seats)</span>
+                                </div>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Available</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                                <div>
+                                    <span class="font-medium text-gray-900">B-205</span>
+                                    <span class="text-sm text-gray-600 ml-2">Laboratory (30 seats)</span>
+                                </div>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Available</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                                <div>
+                                    <span class="font-medium text-gray-900">C-301</span>
+                                    <span class="text-sm text-gray-600 ml-2">Seminar Room (20 seats)</span>
+                                </div>
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Maintenance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetables Page -->
+        <div id="timetables-page" class="page hidden p-6">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Timetable Options</h1>
+                    <p class="text-gray-600">Generated scheduling options with optimization metrics</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="toggleView('calendar')" id="calendar-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Calendar View</button>
+                    <button onclick="toggleView('table')" id="table-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Table View</button>
+                </div>
+            </div>
+
+            <!-- Timetable Options Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg card-shadow p-6 border-l-4 border-green-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Option A - Balanced</h3>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Recommended</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Faculty Workload Balance</span>
+                            <span class="text-sm font-medium text-green-600">95%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Classroom Utilization</span>
+                            <span class="text-sm font-medium text-blue-600">87%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Conflicts Avoided</span>
+                            <span class="text-sm font-medium text-purple-600">100%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Student Preferences</span>
+                            <span class="text-sm font-medium text-yellow-600">92%</span>
+                        </div>
+                    </div>
+                    <button onclick="viewTimetable('A')" class="w-full mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                        View Details
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6 border-l-4 border-blue-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Option B - Efficiency</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">High Efficiency</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Faculty Workload Balance</span>
+                            <span class="text-sm font-medium text-green-600">88%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Classroom Utilization</span>
+                            <span class="text-sm font-medium text-blue-600">96%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Conflicts Avoided</span>
+                            <span class="text-sm font-medium text-purple-600">98%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Student Preferences</span>
+                            <span class="text-sm font-medium text-yellow-600">85%</span>
+                        </div>
+                    </div>
+                    <button onclick="viewTimetable('B')" class="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        View Details
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg card-shadow p-6 border-l-4 border-purple-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Option C - Flexible</h3>
+                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Most Flexible</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Faculty Workload Balance</span>
+                            <span class="text-sm font-medium text-green-600">91%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Classroom Utilization</span>
+                            <span class="text-sm font-medium text-blue-600">82%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Conflicts Avoided</span>
+                            <span class="text-sm font-medium text-purple-600">100%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Student Preferences</span>
+                            <span class="text-sm font-medium text-yellow-600">97%</span>
+                        </div>
+                    </div>
+                    <button onclick="viewTimetable('C')" class="w-full mt-4 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
+                        View Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendar-view" class="bg-white rounded-lg card-shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Weekly Schedule - Option A</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Time</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Monday</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Tuesday</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Wednesday</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Thursday</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Friday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="py-3 px-4 font-medium text-gray-600">9:00 AM</td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-blue-900">CS401</div>
+                                    <div class="text-xs text-blue-700">Dr. Johnson • A-101</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-green-900">MATH301</div>
+                                    <div class="text-xs text-green-700">Prof. Chen • B-205</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-purple-900">PHY201</div>
+                                    <div class="text-xs text-purple-700">Dr. Rodriguez • C-301</div>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-3 px-4 font-medium text-gray-600">10:00 AM</td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-red-900">CHEM101</div>
+                                    <div class="text-xs text-red-700">Prof. Kim • Lab-1</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-blue-900">CS401</div>
+                                    <div class="text-xs text-blue-700">Dr. Johnson • A-101</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-3 px-4 font-medium text-gray-600">11:00 AM</td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-yellow-900">ENG201</div>
+                                    <div class="text-xs text-yellow-700">Dr. Smith • A-102</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-indigo-900">CS302</div>
+                                    <div class="text-xs text-indigo-700">Prof. Lee • B-301</div>
+                                </td>
+                                <td class="py-3 px-4 timetable-cell"></td>
+                                <td class="py-3 px-4 timetable-cell occupied">
+                                    <div class="text-sm font-medium text-green-900">MATH301</div>
+                                    <div class="text-xs text-green-700">Prof. Chen • B-205</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="table-view" class="bg-white rounded-lg card-shadow p-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Course Schedule - Option A</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Course</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Faculty</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Room</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Day</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Time</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="py-3 px-4">CS401 - Advanced Database</td>
+                                <td class="py-3 px-4">Dr. Johnson</td>
+                                <td class="py-3 px-4">A-101</td>
+                                <td class="py-3 px-4">Monday</td>
+                                <td class="py-3 px-4">9:00 AM</td>
+                                <td class="py-3 px-4">2 hours</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-3 px-4">MATH301 - Linear Algebra</td>
+                                <td class="py-3 px-4">Prof. Chen</td>
+                                <td class="py-3 px-4">B-205</td>
+                                <td class="py-3 px-4">Wednesday</td>
+                                <td class="py-3 px-4">9:00 AM</td>
+                                <td class="py-3 px-4">1 hour</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-3 px-4">PHY201 - Quantum Physics</td>
+                                <td class="py-3 px-4">Dr. Rodriguez</td>
+                                <td class="py-3 px-4">C-301</td>
+                                <td class="py-3 px-4">Friday</td>
+                                <td class="py-3 px-4">9:00 AM</td>
+                                <td class="py-3 px-4">1 hour</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-3 px-4">CHEM101 - General Chemistry</td>
+                                <td class="py-3 px-4">Prof. Kim</td>
+                                <td class="py-3 px-4">Lab-1</td>
+                                <td class="py-3 px-4">Tuesday</td>
+                                <td class="py-3 px-4">10:00 AM</td>
+                                <td class="py-3 px-4">3 hours</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Page -->
+        <div id="approval-page" class="page hidden p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900">Approval Workflow</h1>
+                <p class="text-gray-600">Review and approve timetable options</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Pending Approvals -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pending Approvals</h3>
+                    <div class="space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Computer Science Department - Fall 2024</h4>
+                                    <p class="text-sm text-gray-600">Submitted by Dr. Sarah Johnson • 2 hours ago</p>
+                                </div>
+                                <span class="status-pending px-2 py-1 rounded-full text-xs font-medium">Pending Review</span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">24</div>
+                                    <div class="text-xs text-gray-600">Courses</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">12</div>
+                                    <div class="text-xs text-gray-600">Faculty</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">8</div>
+                                    <div class="text-xs text-gray-600">Classrooms</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">0</div>
+                                    <div class="text-xs text-gray-600">Conflicts</div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="showApprovalModal('approve')" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                    Approve
+                                </button>
+                                <button onclick="showApprovalModal('reject')" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                    Reject
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Mathematics Department - Fall 2024</h4>
+                                    <p class="text-sm text-gray-600">Submitted by Prof. Michael Chen • 5 hours ago</p>
+                                </div>
+                                <span class="status-pending px-2 py-1 rounded-full text-xs font-medium">Pending Review</span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">18</div>
+                                    <div class="text-xs text-gray-600">Courses</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">9</div>
+                                    <div class="text-xs text-gray-600">Faculty</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">6</div>
+                                    <div class="text-xs text-gray-600">Classrooms</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-gray-900">1</div>
+                                    <div class="text-xs text-gray-600">Conflicts</div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="showApprovalModal('approve')" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                    Approve
+                                </button>
+                                <button onclick="showApprovalModal('reject')" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                    Reject
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Decisions -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Decisions</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-md">
+                            <div>
+                                <div class="font-medium text-gray-900">Physics Department - Fall 2024</div>
+                                <div class="text-sm text-gray-600">Approved by Dean Wilson • 1 day ago</div>
+                            </div>
+                            <span class="status-approved px-2 py-1 rounded-full text-xs font-medium">Approved</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-red-50 rounded-md">
+                            <div>
+                                <div class="font-medium text-gray-900">Chemistry Department - Fall 2024</div>
+                                <div class="text-sm text-gray-600">Rejected by Dean Wilson • 2 days ago</div>
+                                <div class="text-xs text-gray-500 mt-1">Reason: Resource conflicts with lab schedules</div>
+                            </div>
+                            <span class="status-rejected px-2 py-1 rounded-full text-xs font-medium">Rejected</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-md">
+                            <div>
+                                <div class="font-medium text-gray-900">English Department - Fall 2024</div>
+                                <div class="text-sm text-gray-600">Approved by Dean Wilson • 3 days ago</div>
+                            </div>
+                            <span class="status-approved px-2 py-1 rounded-full text-xs font-medium">Approved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Modal -->
+    <div id="approval-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4" id="modal-title">Approve Timetable</h3>
+                <form onsubmit="handleApproval(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Comments</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" rows="4" placeholder="Add your comments here..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeApprovalModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" id="modal-action-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Approve
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('sidebar-active', 'text-indigo-600');
+                item.classList.add('text-gray-600');
+            });
+            
+            // Set active sidebar item
+           const activeItem = document.querySelector(`[data-page="${pageId.replace('-page', '')}"]`);
+
+            if (activeItem) {
+                activeItem.classList.add('sidebar-active', 'text-indigo-600');
+                activeItem.classList.remove('text-gray-600');
+            }
+        }
+
+        // Sidebar click handlers
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = item.getAttribute('data-page');
+                showPage(page + '-page');
+            });
+        });
+
+        // Form handlers
+        function handleLogin(event) {
+            event.preventDefault();
+            alert('Login successful! Redirecting to dashboard...');
+            showPage('dashboard-page');
+        }
+
+        function handleCourseSubmit(event) {
+            event.preventDefault();
+            alert('Course added successfully!');
+            event.target.reset();
+        }
+
+        function handleFacultySubmit(event) {
+            event.preventDefault();
+            alert('Faculty availability updated successfully!');
+        }
+
+        function handleClassroomSubmit(event) {
+            event.preventDefault();
+            alert('Classroom added successfully!');
+            event.target.reset();
+        }
+
+        // Timetable view toggle
+        function toggleView(view) {
+            const calendarView = document.getElementById('calendar-view');
+            const tableView = document.getElementById('table-view');
+            const calendarBtn = document.getElementById('calendar-btn');
+            const tableBtn = document.getElementById('table-btn');
+
+            if (view === 'calendar') {
+                calendarView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                calendarBtn.classList.add('bg-indigo-600', 'text-white');
+                calendarBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                tableBtn.classList.add('bg-gray-200', 'text-gray-700');
+                tableBtn.classList.remove('bg-indigo-600', 'text-white');
+            } else {
+                calendarView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                tableBtn.classList.add('bg-indigo-600', 'text-white');
+                tableBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                calendarBtn.classList.add('bg-gray-200', 'text-gray-700');
+                calendarBtn.classList.remove('bg-indigo-600', 'text-white');
+            }
+        }
+
+        function viewTimetable(option) {
+            alert(`Viewing detailed timetable for Option ${option}`);
+
+        }
+
+        // Approval modal functions
+        function showApprovalModal(action) {
+            const modal = document.getElementById('approval-modal');
+            const title = document.getElementById('modal-title');
+            const actionBtn = document.getElementById('modal-action-btn');
+            
+            if (action === 'approve') {
+                title.textContent = 'Approve Timetable';
+                actionBtn.textContent = 'Approve';
+                actionBtn.className = 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700';
+            } else {
+                title.textContent = 'Reject Timetable';
+                actionBtn.textContent = 'Reject';
+                actionBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeApprovalModal() {
+            document.getElementById('approval-modal').classList.add('hidden');
+        }
+
+        function handleApproval(event) {
+            event.preventDefault();
+            const action = document.getElementById('modal-action-btn').textContent.toLowerCase();
+           alert("Timetable " + action + "d successfully!");
+
+            closeApprovalModal();
+        }
+
+        // Mobile responsiveness
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // Initialize with dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('dashboard-page');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988bf909b57ba7ce',t:'MTc1OTQ4OTYxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
